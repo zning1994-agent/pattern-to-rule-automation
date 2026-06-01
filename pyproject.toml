@@ -1,0 +1,32 @@
+[project]
+name = "pattern-to-rule-automation"
+version = "0.1.0"
+description = "Detect recurring agent behavior patterns and generate draft rule proposals."
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.1.0",
+    "fastapi>=0.109.0",
+    "pydantic>=2.5.0",
+    "pyyaml>=6.0.0",
+    "uvicorn>=0.27.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "httpx>=0.26.0",
+    "pytest>=7.4.0",
+]
+
+[project.scripts]
+pra = "pra.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
