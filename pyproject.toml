@@ -4,10 +4,13 @@ version = "0.1.0"
 description = "Detect recurring agent behavior patterns and generate draft rule proposals."
 requires-python = ">=3.11"
 dependencies = [
+    "aiosqlite>=0.19.0",
     "click>=8.1.0",
     "fastapi>=0.109.0",
     "pydantic>=2.5.0",
     "pyyaml>=6.0.0",
+    "sqlalchemy>=2.0.0",
+    "toml>=0.10.2",
     "uvicorn>=0.27.0",
 ]
 

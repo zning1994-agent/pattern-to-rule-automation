@@ -1,4 +1,8 @@
 from pra.core import generate_rule, scan_path
+from pra.analyzer import ConfidenceAnalyzer
+from pra.generator import RuleGenerator
+from pra.scanner import KnowledgeBaseScanner
+from pra.storage import ProposalStore
 
 
 def test_scan_path_detects_patterns(tmp_path):
@@ -26,3 +30,20 @@ def test_generate_rule_returns_json_schema(tmp_path):
 
     assert rule.status == "proposed"
     assert rule.schema["properties"]["pattern"]["const"] == "instruction.session_isolation"
+
+
+def test_spec_shaped_modules_work(tmp_path):
+    kb = tmp_path / "patterns.md"
+    kb.write_text(
+        "system.heartbeat_repeated_check happened.\n"
+        "system.heartbeat_repeated_check happened again.\n",
+        encoding="utf-8",
+    )
+
+    patterns = KnowledgeBaseScanner().scan(kb)
+    rule = RuleGenerator().generate_rule_draft(patterns[0])
+    store = ProposalStore(tmp_path / "pra.db")
+    store.add(rule)
+
+    assert ConfidenceAnalyzer().promotion_candidates(patterns)
+    assert store.list()[0]["id"] == rule.id
