@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from enum import StrEnum
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -34,6 +35,35 @@ class RuleDraft:
     schema: dict[str, Any]
     confidence: float
     status: str = "proposed"
+    reviewed_by: str | None = None
+    reviewed_at: str | None = None
+    activated_at: str | None = None
+    modified_at: str | None = None
+
+
+class RuleStatus(StrEnum):
+    PROPOSED = "proposed"
+    APPROVED = "approved"
+    ACTIVE = "active"
+    MODIFIED = "modified"
+    DEPRECATED = "deprecated"
+
+
+ALLOWED_TRANSITIONS: dict[RuleStatus, set[RuleStatus]] = {
+    RuleStatus.PROPOSED: {RuleStatus.APPROVED, RuleStatus.DEPRECATED},
+    RuleStatus.APPROVED: {RuleStatus.ACTIVE, RuleStatus.MODIFIED, RuleStatus.DEPRECATED},
+    RuleStatus.ACTIVE: {RuleStatus.MODIFIED, RuleStatus.DEPRECATED},
+    RuleStatus.MODIFIED: {RuleStatus.APPROVED, RuleStatus.ACTIVE, RuleStatus.DEPRECATED},
+    RuleStatus.DEPRECATED: set(),
+}
+
+
+def validate_status_transition(current: str, target: str) -> None:
+    source_status = RuleStatus(current)
+    target_status = RuleStatus(target)
+    if target_status not in ALLOWED_TRANSITIONS[source_status]:
+        msg = f"Cannot transition rule from {source_status.value} to {target_status.value}"
+        raise ValueError(msg)
 
 
 def _read_text(path: Path) -> str:
